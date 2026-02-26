@@ -127,7 +127,19 @@ func SimpleLS(w io.Writer, files []string, dirs []string, useColor bool) {
 	header := len(dirs) > 1
 
 	for i := 0; i < len(files); i++ {
-		err := handleFile(w, files[i], useColor)
+
+		info, err := os.Lstat(files[i])
+		mode := info.Mode()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+
+		if mode.IsRegular() && (mode & 0111) != 0 {
+			printExec(w, files[i], useColor)
+			continue
+		}
+
+		err = handleFile(w, files[i], useColor)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 		}

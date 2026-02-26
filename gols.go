@@ -19,16 +19,6 @@ func filterFile(file string) bool {
 	return true
 }
 
-func filterDir(dir string) bool {
-	_, err := os.ReadDir(dir)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return false
-		}
-
-	return true
-}
-
 func parseArgs(args []string) ([]string, []string, error) {
 	var files []string
 	var dirs []string
@@ -46,8 +36,19 @@ func parseArgs(args []string) ([]string, []string, error) {
 				files = append(files, args[i])
 			}
 		} else {
-			ok := filterDir(args[i])
+			info, err := os.Lstat(args[i])
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				continue
+			}
 
+			mode := info.Mode()
+
+			if mode.IsRegular() && (mode & 0111) != 0 {
+				files = append(files, args[i])
+			}
+
+			ok := mode.IsDir()
 			if ok {
 				dirs = append(dirs, args[i])
 			}
@@ -80,6 +81,8 @@ func main() {
 		dirlist = append(dirlist, curdir)
 
 		handleArgs(nil, dirlist)
+		fmt.Fprint(os.Stdout, "\n")
+		return
 	}
 
 	args = args[1:]
@@ -93,4 +96,5 @@ func main() {
 	sort.Strings(dirs)
 
 	handleArgs(files, dirs)
+	if len(dirs) == 1 {fmt.Fprint(os.Stdout, "\n")}
 }
