@@ -1,13 +1,12 @@
 package functions
 
 import (
-	"fmt"
 	"io"
 )
 
 func (c color) colorPrint(w io.Writer, s string) {
-	fmt.Fprint(w, c)
-	fmt.Fprint(w, s)
+	w.Write([]byte(c))
+	w.Write([]byte(s))
 
-	fmt.Fprint(w, Default)
+	w.Write([]byte(Default))
 }

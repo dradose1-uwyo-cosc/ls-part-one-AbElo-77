@@ -20,7 +20,7 @@ func handleFile(w io.Writer, file string, color bool) error {
 	if color {
 		Default.colorPrint(w, file)
 	} else {
-		fmt.Fprint(w, file)
+		w.Write([]byte(file))
 	}
 	return nil
 }
@@ -29,7 +29,7 @@ func printDir(w io.Writer, dir string, color bool) {
 	if color {
 		Blue.colorPrint(w, dir)
 	} else {
-		fmt.Fprint(w, dir)
+		w.Write([]byte(dir))
 	}
 }
 
@@ -37,7 +37,7 @@ func printExec(w io.Writer, exec string, color bool) {
 	if color {
 		Green.colorPrint(w, exec)
 	} else {
-		fmt.Fprint(w, exec)
+		w.Write([]byte(exec))
 	}
 }
 
@@ -92,7 +92,7 @@ func handleDirectory(w io.Writer, dir string, color bool, header bool) error {
 	entries, err = sort1(entries)
 
 	if header {
-		fmt.Fprint(w, dir + ":\n")
+		w.Write([]byte(dir + ":\n"))
 	}
 
 	for i := 0; i < len(entries); i++ {
@@ -113,18 +113,14 @@ func handleDirectory(w io.Writer, dir string, color bool, header bool) error {
 			handleFile(w, cur.Name(), color)
 		}
 
-		if i != len(entries) - 1 {fmt.Fprint(w, "\n")}
-	}
-
-	if header {
-		fmt.Fprint(w, "\n")
+		if i != len(entries) - 1 {w.Write([]byte("\n"))}
 	}
 
 	return nil
 }
 
 func SimpleLS(w io.Writer, files []string, dirs []string, useColor bool) {
-	header := len(dirs) > 1
+	header := len(dirs) + len(files) > 1
 
 	for i := 0; i < len(files); i++ {
 
@@ -136,6 +132,7 @@ func SimpleLS(w io.Writer, files []string, dirs []string, useColor bool) {
 
 		if mode.IsRegular() && (mode & 0111) != 0 {
 			printExec(w, files[i], useColor)
+			w.Write([]byte("\n"))
 			continue
 		}
 
@@ -144,10 +141,10 @@ func SimpleLS(w io.Writer, files []string, dirs []string, useColor bool) {
 			fmt.Fprintln(os.Stderr, err)
 		}
 
-		fmt.Fprint(w, "\n")
+		w.Write([]byte("\n"))
 	}
 
-	if len(files) > 0 {fmt.Fprint(w, "\n")}
+	if len(files) > 0 && len(dirs) > 0 {w.Write([]byte("\n"))}
 
 	for i := 0; i < len(dirs); i++ {
 		err := handleDirectory(w, dirs[i], useColor, header)
@@ -155,6 +152,10 @@ func SimpleLS(w io.Writer, files []string, dirs []string, useColor bool) {
 			fmt.Fprintln(os.Stderr, err)
 		}
 
-		if i != len(dirs) - 1 {fmt.Fprint(w, "\n")}
+		w.Write([]byte("\n"))
+		
+		if i != len(dirs) - 1 {
+			w.Write([]byte("\n"))
+		}
 	}
 }

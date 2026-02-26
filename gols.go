@@ -81,7 +81,6 @@ func main() {
 		dirlist = append(dirlist, curdir)
 
 		handleArgs(nil, dirlist)
-		fmt.Fprint(os.Stdout, "\n")
 		return
 	}
 
@@ -96,5 +95,4 @@ func main() {
 	sort.Strings(dirs)
 
 	handleArgs(files, dirs)
-	if len(dirs) == 1 {fmt.Fprint(os.Stdout, "\n")}
 }
