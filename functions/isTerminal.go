@@ -1,8 +1,3 @@
-//Danny Radosevich
-
-//Re-writing ls command in Go
-//check if writing to terminal
-
 package functions
 
 import "os"
