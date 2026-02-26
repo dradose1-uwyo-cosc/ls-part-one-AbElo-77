@@ -7,6 +7,7 @@ import (
 	"os"
 	"regexp"
 	"sort"
+	"strings"
 )
 
 func filterFile(file string) bool {
@@ -91,8 +92,13 @@ func main() {
 		os.Exit(2)
 	}
 
-	sort.Strings(files)
-	sort.Strings(dirs)
+	sort.Slice(files, func(i, j int) bool {
+    	return strings.ToLower(files[i]) < strings.ToLower(files[j])
+	})
+
+	sort.Slice(dirs, func(i, j int) bool {
+    	return strings.ToLower(dirs[i]) < strings.ToLower(dirs[j])
+	})
 
 	handleArgs(files, dirs)
 }

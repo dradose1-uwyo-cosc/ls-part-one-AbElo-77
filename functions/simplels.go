@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"sort"
 	"slices"
+	"strings"
 )
 
 type color string
@@ -49,7 +50,10 @@ func indexMap(entries []os.DirEntry) map[int]int {
 	}
 
 	original := sorted
-	sort.Strings(sorted)
+	sort.Slice(sorted, func(i, j int) bool {
+    	return strings.ToLower(sorted[i]) < strings.ToLower(sorted[j])
+	})
+
 
 	idx := make(map[int]int)
 	for i := 0; i < len(original); i++ {
