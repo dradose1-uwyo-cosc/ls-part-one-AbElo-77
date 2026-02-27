@@ -6,8 +6,8 @@ import (
 	"ls-part-one-AbElo-77/functions"
 	"os"
 	"regexp"
-	"sort"
 	"strings"
+	"slices"
 )
 
 func filterFile(file string) bool {
@@ -92,13 +92,35 @@ func main() {
 		os.Exit(2)
 	}
 
-	sort.Slice(files, func(i, j int) bool {
-    	return strings.ToLower(files[i]) < strings.ToLower(files[j])
-	})
+	/* from what I understand, ls (at least on the department machines)
+	sorts on lowercase comparisons. It also seems to ignore punctuation. */
+	slices.SortFunc(files, func(a, b string) int {
+			name1, name2 := a, b
+			name1, name2 = strings.ReplaceAll(name1, ".", ""), strings.ReplaceAll(name2, ".", "")
+			
+			alow, blow := strings.ToLower(name1), strings.ToLower(name2)	
+			if alow != blow {
+				if alow < blow { return -1 }
+				return 1
+			}
 
-	sort.Slice(dirs, func(i, j int) bool {
-    	return strings.ToLower(dirs[i]) < strings.ToLower(dirs[j])
-	})
+			return 0
+		})
+
+	/* from what I understand, ls (at least on the department machines)
+	sorts on lowercase comparisons. It also seems to ignore punctuation. */
+	slices.SortFunc(dirs, func(a, b string) int {
+			name1, name2 := a, b
+			name1, name2 = strings.ReplaceAll(name1, ".", ""), strings.ReplaceAll(name2, ".", "")
+			
+			alow, blow := strings.ToLower(name1), strings.ToLower(name2)	
+			if alow != blow {
+				if alow < blow { return -1 }
+				return 1
+			}
+
+			return 0
+		})
 
 	handleArgs(files, dirs)
 }

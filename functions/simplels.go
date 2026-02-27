@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"sort"
 	"slices"
 	"strings"
 )
@@ -42,47 +41,23 @@ func printExec(w io.Writer, exec string, color bool) {
 	}
 }
 
-func indexMap(entries []os.DirEntry) map[int]int {
-
-	var sorted []string
-	for i := 0; i < len(entries); i++ {
-		sorted = append(sorted, entries[i].Name())
-	}
-
-	original := sorted
-	sort.Slice(sorted, func(i, j int) bool {
-    	return strings.ToLower(sorted[i]) < strings.ToLower(sorted[j])
-	})
-
-
-	idx := make(map[int]int)
-	for i := 0; i < len(original); i++ {
-		idx[i] = slices.Index(sorted, original[i])
-	}
-
-	return idx
-}
-
-func transformEntries(entries []os.DirEntry, idx map[int]int) []os.DirEntry {
-	out := make([]os.DirEntry, len(entries))
-	for i := 0; i < len(entries); i++ {
-		out[i] = entries[idx[i]]
-	}
-
-	return out
-}
-
+/* from what I understand, ls (at least on the department machines)
+sorts on lowercase comparisons. It also seems to ignore punctuation. */
 func sort1(entries []os.DirEntry) ([]os.DirEntry, error) {
-	var out []os.DirEntry
+	slices.SortFunc(entries, func(a, b os.DirEntry) int {
+			name1, name2 := a.Name(), b.Name()
+			name1, name2 = strings.ReplaceAll(name1, ".", ""), strings.ReplaceAll(name2, ".", "")
+			
+			alow, blow := strings.ToLower(name1), strings.ToLower(name2)
+			if alow != blow {
+				if alow < blow { return -1 }
+				return 1
+			}
+			
+			return 0
+		})
 
-	for i := 0; i < len(entries); i++ {
-		cur := entries[i]
-		out = append(out, cur)
-	}
-
-	out = transformEntries(out, indexMap(out))
-
-	return out, nil
+	return entries, nil
 }
 
 func handleDirectory(w io.Writer, dir string, color bool, header bool) error {
